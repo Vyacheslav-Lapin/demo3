@@ -15,7 +15,11 @@
 
   <properties>
     <java.version>16</java.version>
+    <spring-boot.version>2.5.3</spring-boot.version>
+    <minimal.maven.version>3.8.1</minimal.maven.version>
+
     <vavr.version>0.10.4</vavr.version>
+    <springdoc-openapi.version>1.5.10</springdoc-openapi.version>
 
     <checker.version>3.17.0</checker.version>
     <annotations.version>21.0.1</annotations.version>
@@ -23,7 +27,6 @@
     <spotbugs.version>4.3.0</spotbugs.version>
     <error_prone_annotations.version>2.8.1</error_prone_annotations.version>
 
-    <spring-boot.version>2.5.3</spring-boot.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <maven.compiler.parameters>true</maven.compiler.parameters>
@@ -31,7 +34,9 @@
     <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
 
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
+    <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -74,6 +79,25 @@
         <scope>provided</scope>
       </dependency>
       <!--endregion-->
+
+      <!--region SpringDoc OpenAPI-->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-ui</artifactId>
+        <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-data-rest</artifactId>
+        <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-security</artifactId>
+        <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <!--endregion-->
+
     </dependencies>
   </dependencyManagement>
 
@@ -85,6 +109,10 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -137,6 +165,44 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!--region Common Annotations (CheckerFramework, JetBrains, SpotBugs, ErrorProne) -->
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+    </dependency>
+    <!--endregion-->
+
+    <!--region SpringDoc OpenAPI-->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-data-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-security</artifactId>
+    </dependency>
+    <!--endregion-->
   </dependencies>
 
   <build>
@@ -210,6 +276,36 @@
             <argLine>--enable-preview</argLine>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>versions-maven-plugin</artifactId>
+          <version>${versions-maven-plugin.version}</version>
+          <configuration>
+            <generateBackupPoms>false</generateBackupPoms>
+            <!--suppress MavenModelInspection, UnresolvedMavenProperty -->
+            <rulesUri>file://${maven.multiModuleProjectDirectory}/ruleset.xml</rulesUri>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>enforce-maven</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <requireMavenVersion>
+                    <version>${minimal.maven.version}</version>
+                  </requireMavenVersion>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -217,6 +313,13 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
